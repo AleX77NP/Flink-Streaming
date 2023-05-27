@@ -42,39 +42,42 @@ import java.util.Locale;
  */
 public class StreamingJob {
 
-	private SourceFunction<Pokemon> source;
-	private SinkFunction<Pokemon> sink;
+    private SourceFunction<Pokemon> source;
+    private SinkFunction<Pokemon> sink;
 
-	public StreamingJob(SourceFunction<Pokemon> source, SinkFunction<Pokemon> sink) {
-		this.source = source;
-		this.sink = sink;
-	}
+    public StreamingJob(SourceFunction<Pokemon> source, SinkFunction<Pokemon> sink) {
+        this.source = source;
+        this.sink = sink;
+    }
 
-	public void execute() throws Exception {
-		StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    public void execute() throws Exception {
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-		DataStream<Pokemon> PokemonDataStream =
-				env.addSource(source)
-						.returns(TypeInformation.of(Pokemon.class));
+        DataStream<Pokemon> PokemonDataStream =
+                env.addSource(source)
+                        .returns(TypeInformation.of(Pokemon.class));
 
-		PokemonDataStream
-				.map(new ModifyName())
-				.addSink(sink);
+        PokemonDataStream
+                .map(new ModifyName())
+                .addSink(sink);
 
-		env.execute();
-	}
+        env.execute();
+    }
 
-	public class ModifyName implements MapFunction<Pokemon, Pokemon> {
+    public class ModifyName implements MapFunction<Pokemon, Pokemon> {
 
-		@Override
-		public Pokemon map(Pokemon pokemon) throws Exception {
-			pokemon.setName(pokemon.getName().toLowerCase(Locale.ROOT));
-			return pokemon;
-		}
-	}
+        @Override
+        public Pokemon map(Pokemon pokemon) throws Exception {
+            if (pokemon.getHeight() > 12)
+                pokemon.setName(pokemon.getName().toUpperCase(Locale.ROOT));
+            else
+                pokemon.setName(pokemon.getName().toLowerCase(Locale.ROOT));
+            return pokemon;
+        }
+    }
 
-	public static void main(String[] args) throws Exception {
-		StreamingJob streamingJob = new StreamingJob(new PokemonStreamSource(), new PrintSinkFunction<>());
-		streamingJob.execute();
-	}
+    public static void main(String[] args) throws Exception {
+        StreamingJob streamingJob = new StreamingJob(new PokemonStreamSource(), new PrintSinkFunction<>());
+        streamingJob.execute();
+    }
 }
