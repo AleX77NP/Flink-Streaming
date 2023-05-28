@@ -58,13 +58,13 @@ public class StreamingJob {
                         .returns(TypeInformation.of(Pokemon.class));
 
         PokemonDataStream
-                .map(new ModifyName())
+                .map(new NameModifier())
                 .addSink(sink);
 
         env.execute();
     }
 
-    public class ModifyName implements MapFunction<Pokemon, Pokemon> {
+    public class NameModifier implements MapFunction<Pokemon, Pokemon> {
 
         @Override
         public Pokemon map(Pokemon pokemon) throws Exception {
